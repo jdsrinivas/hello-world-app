@@ -1,4 +1,3 @@
-
 pipeline {
     agent any
 
@@ -20,9 +19,9 @@ pipeline {
             steps {
                 script {
                     if (USE_CYCLONEDX.toBoolean()) {
-                        sh 'npm install -g @cyclonedx/cyclonedx-npm'
+                        bat 'npm install -g @cyclonedx/cyclonedx-npm'
                     }
-                    sh 'npm install'
+                    bat 'npm install'
                 }
             }
         }
@@ -31,9 +30,9 @@ pipeline {
             steps {
                 script {
                     if (USE_CYCLONEDX.toBoolean()) {
-                        sh "cyclonedx-npm --output-format json --output-file "
+                        bat "cyclonedx-npm --output-format json --output-file ${SBOM_FILE}"
                     } else {
-                        sh "npm audit --json > "
+                        bat "npm audit --json > ${SBOM_FILE}"
                     }
                 }
             }
@@ -41,15 +40,14 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'npm run build'
+                bat 'npm run build'
             }
         }
 
         stage('Archive SBOM') {
             steps {
-                archiveArtifacts artifacts: "", fingerprint: true
+                archiveArtifacts artifacts: "${SBOM_FILE}", fingerprint: true
             }
         }
     }
 }
-
